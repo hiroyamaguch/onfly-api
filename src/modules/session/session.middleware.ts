@@ -14,15 +14,19 @@ export class SessionMiddleware implements NestMiddleware {
   async use(req: Request, res: Response, next: NextFunction) {
     const token = req.headers['authorization'];
 
-    const decoded = this.jwtService.decodeToken(token.split(' ')[1]);
+    if (token) {
+      const decoded = this.jwtService.decodeToken(token.split(' ')[1]);
 
-    if (decoded) {
-      const user = await prisma.user.findFirst({ where: { id: decoded.sub } });
+      if (decoded) {
+        const user = await prisma.user.findFirst({
+          where: { id: decoded.sub },
+        });
 
-      if (user) {
-        req.user = user;
+        if (user) {
+          req.user = user;
 
-        return next();
+          return next();
+        }
       }
     }
 

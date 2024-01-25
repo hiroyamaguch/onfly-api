@@ -12,6 +12,6 @@ export class AppModule {
   configure(consumer: MiddlewareConsumer): void {
     consumer
       .apply(SessionMiddleware)
-      .forRoutes({ path: 'expenses/*', method: RequestMethod.ALL });
+      .forRoutes({ path: 'expenses', method: RequestMethod.ALL });
   }
 }

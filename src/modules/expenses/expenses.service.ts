@@ -1,10 +1,23 @@
 import { prisma } from '@/shared/infra/database/prisma';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Inject,
+  Injectable,
+  NotFoundException,
+  Scope,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { Expense } from '@prisma/client';
 import { CreateExpenseDTO, UpdateExpenseDTO } from './dtos';
+import { REQUEST } from '@nestjs/core';
+import { Request } from 'express';
 
-@Injectable()
+@Injectable({ scope: Scope.REQUEST })
 export class ExpensesService {
+  constructor(
+    @Inject(REQUEST)
+    private request: Request,
+  ) {}
+
   async create(data: CreateExpenseDTO): Promise<Expense> {
     const expense = await prisma.expense.create({
       data: {
@@ -21,6 +34,10 @@ export class ExpensesService {
   async findById(id: string): Promise<Expense> {
     const expense = await prisma.expense.findFirst({ where: { id } });
 
+    if (this.request.user.id !== id) {
+      throw new UnauthorizedException();
+    }
+
     if (!expense) {
       throw new NotFoundException('Expense not found');
     }
@@ -29,6 +46,8 @@ export class ExpensesService {
   }
 
   async update(data: UpdateExpenseDTO): Promise<Expense> {
+    await this.findById(data.id);
+
     const expense = await prisma.expense.update({
       where: {
         id: data.id,
@@ -45,6 +64,8 @@ export class ExpensesService {
   }
 
   async delete(id: string): Promise<void> {
+    await this.findById(id);
+
     await prisma.expense.delete({ where: { id } });
   }
 }

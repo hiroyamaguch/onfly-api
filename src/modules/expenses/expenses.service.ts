@@ -56,7 +56,7 @@ export class ExpensesService {
   async findById(id: string): Promise<Expense> {
     const expense = await prisma.expense.findFirst({ where: { id } });
 
-    if (this.request.user.id !== id) {
+    if (this.request.user.id !== expense.userId) {
       throw new UnauthorizedException();
     }
 
@@ -68,7 +68,22 @@ export class ExpensesService {
   }
 
   async update(data: UpdateExpenseDTO): Promise<Expense> {
+    // Verifica se o usuário que está alterando realmente é o dono da despesa
     await this.findById(data.id);
+
+    if (data.date && isBefore(new Date(data.date), new Date())) {
+      throw new BadRequestException('A past date cannot be used.');
+    }
+
+    if (data.value && data.value < 0) {
+      throw new BadRequestException('The value must be positive.');
+    }
+
+    if (data.description && data.description.length > 191) {
+      throw new BadRequestException(
+        'The description can have a maximum of 191 characters.',
+      );
+    }
 
     const expense = await prisma.expense.update({
       where: {
@@ -77,7 +92,6 @@ export class ExpensesService {
       data: {
         date: data.date,
         description: data.description,
-        userId: data.userId,
         value: data.value,
       },
     });

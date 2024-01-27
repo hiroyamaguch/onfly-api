@@ -11,9 +11,6 @@ export class UpdateExpenseDTO {
   @IsString()
   date?: string;
 
-  @IsString()
-  userId?: string;
-
   @IsNumber()
   value?: number;
 }

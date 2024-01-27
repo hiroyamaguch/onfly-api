@@ -7,23 +7,19 @@ export class SessionController {
   constructor(readonly sessionService: SessionService) {}
 
   @Post()
-  async createSession(
-    @Body() data: CreateSessionDTO,
-  ): Promise<RefreshTokenDTO> {
+  async create(@Body() data: CreateSessionDTO): Promise<RefreshTokenDTO> {
     const { name, password } = data;
 
-    const session = await this.sessionService.createSession(name, password);
+    const session = await this.sessionService.create(name, password);
 
     return session;
   }
 
   @Post('refresh')
-  async refreshSession(
-    @Body() data: RefreshTokenDTO,
-  ): Promise<RefreshTokenDTO> {
+  async refresh(@Body() data: RefreshTokenDTO): Promise<RefreshTokenDTO> {
     const { refresh_token } = data;
 
-    const session = await this.sessionService.refreshSession(refresh_token);
+    const session = await this.sessionService.refresh(refresh_token);
 
     return session;
   }

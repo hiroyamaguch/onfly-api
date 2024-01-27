@@ -29,10 +29,7 @@ export class SessionService {
     return { access_token, refresh_token };
   }
 
-  async createSession(
-    name: string,
-    password: string,
-  ): Promise<RefreshTokenDTO> {
+  async create(name: string, password: string): Promise<RefreshTokenDTO> {
     const user = await prisma.user.findFirst({
       where: { name, password },
     });
@@ -42,7 +39,7 @@ export class SessionService {
     return sessionData;
   }
 
-  async refreshSession(token: string): Promise<RefreshTokenDTO> {
+  async refresh(token: string): Promise<RefreshTokenDTO> {
     const decoded = this.jwtService.decodeToken(token);
 
     const user = await prisma.user.findFirst({

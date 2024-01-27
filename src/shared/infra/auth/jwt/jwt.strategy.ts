@@ -13,7 +13,7 @@ export class JwtStrategy extends PassportStrategy(Strategy) {
     });
   }
 
-  validate(payload: any): Omit<User, 'password'> {
+  validate(payload: any): Omit<User, 'password' | 'email'> {
     return { id: payload.sub, name: payload.username };
   }
 }

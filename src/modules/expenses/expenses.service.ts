@@ -1,4 +1,5 @@
 import { prisma } from '@/shared/infra/database/prisma';
+import { Resend } from 'resend';
 import {
   BadRequestException,
   Inject,
@@ -15,6 +16,8 @@ import { isBefore } from 'date-fns';
 
 @Injectable({ scope: Scope.REQUEST })
 export class ExpensesService {
+  private resend = new Resend(process.env.RESEND_API_KEY);
+
   constructor(
     @Inject(REQUEST)
     private request: Request,
@@ -49,6 +52,17 @@ export class ExpensesService {
         value: data.value,
       },
     });
+
+    try {
+      await this.resend.emails.send({
+        from: 'onboarding@resend.dev',
+        to: user.email,
+        subject: 'Nova despesa criada com sucesso!',
+        html: `<p>Parabéns, a despesa de identificador <strong>${expense.id}</strong>, no valor de <strong>R$ ${expense.value}</strong> foi criada com sucesso!</p>`,
+      });
+    } catch (error) {
+      console.log(error);
+    }
 
     return expense;
   }

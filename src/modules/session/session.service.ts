@@ -1,8 +1,13 @@
 import { JWTService } from '@/shared/infra/auth/jwt/jwt.service';
 import { prisma } from '@/shared/infra/database/prisma';
-import { Injectable, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { RefreshTokenDTO } from './dtos';
 import { User } from '@prisma/client';
+import * as bcrypt from 'bcrypt';
 
 @Injectable()
 export class SessionService {
@@ -31,8 +36,14 @@ export class SessionService {
 
   async create(name: string, password: string): Promise<RefreshTokenDTO> {
     const user = await prisma.user.findFirst({
-      where: { name, password },
+      where: { name },
     });
+
+    const isValidCredentials = bcrypt.compareSync(password, user.password);
+
+    if (!isValidCredentials) {
+      throw new UnauthorizedException();
+    }
 
     const sessionData = this.generateSessionData(user);
 

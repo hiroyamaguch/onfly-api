@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
 import { SessionService } from './session.service';
 import { JWTModule } from '@/shared/infra/auth/jwt/jwt.module';
-import { NotFoundException } from '@nestjs/common';
+import { UnauthorizedException } from '@nestjs/common';
 
 describe('Session Service', () => {
   let service: SessionService;
@@ -21,7 +21,7 @@ describe('Session Service', () => {
 
   it('should not create session with wrong data', async () => {
     await expect(service.create('Pedro', '12')).rejects.toThrow(
-      NotFoundException,
+      UnauthorizedException,
     );
   });
 });
